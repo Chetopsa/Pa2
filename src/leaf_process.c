@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     hash_data_block(file_hash, file_path);
     //TODO(): construct string write to pipe. The format is "<file_path>|<hash_value>"
     char str_pipe[PATH_MAX + SHA256_BLOCK_SIZE * 2 + 2];
-    sprintf(str_pipe,"%s|%s" , file_path, file_hash);
+    sprintf(str_pipe,"%s|%s|" , file_path, file_hash);
 
     if(pipe_write_end == 0){
         //TODO(inter submission)
@@ -46,6 +46,12 @@ int main(int argc, char* argv[]) {
 
     }else{
         //TODO(final submission): write the string to pipe
+        int fd[2];
+        if (pipe(fd) < 0) 
+            exit(1);
+        close(fd[0]);
+        write(fd[1], str_pipe, strlen(str_pipe));
+        close(fd[1]);
         exit(0);
     }
     exit(0);
