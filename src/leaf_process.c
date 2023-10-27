@@ -46,13 +46,10 @@ int main(int argc, char* argv[]) {
 
     }else{
         //TODO(final submission): write the string to pipe
-        int fd[2];
-        if (pipe(fd) < 0) 
-            exit(1);
-        close(fd[0]);
-        write(fd[1], str_pipe, strlen(str_pipe));
-        close(fd[1]);
-        exit(0);
+        //write to pipe
+        write(pipe_write_end, str_pipe, strlen(str_pipe));
+        close(pipe_write_end); //close pipe
+        
     }
     exit(0);
 }
