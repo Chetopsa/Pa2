@@ -8,6 +8,7 @@
 char *output_file_folder = "output/inter_submission/";
 
 int main(int argc, char* argv[]) {
+    printf("LEAF PROCESS WOOOOO\n");
     if (argc != 3) {
         printf("Usage: Inter Submission --> ./leaf_process <file_path> 0\n");
         printf("Usage: Final Submission --> ./leaf_process <file_path> <pipe_write_end>\n");
@@ -17,10 +18,11 @@ int main(int argc, char* argv[]) {
     char* file_path = argv[1];
     int pipe_write_end = atoi(argv[2]);
     //TODO(): create the hash of given file
-    char file_hash[SHA256_BLOCK_SIZE * 2 + 1];
+    char file_hash[8192];
     hash_data_block(file_hash, file_path);
     //TODO(): construct string write to pipe. The format is "<file_path>|<hash_value>"
-    char str_pipe[PATH_MAX + SHA256_BLOCK_SIZE * 2 + 2];
+    char str_pipe[8192 + PATH_MAX];
+   
     sprintf(str_pipe,"%s|%s|" , file_path, file_hash);
 
     if(pipe_write_end == 0){
@@ -43,13 +45,10 @@ int main(int argc, char* argv[]) {
         fclose(fptr);
         //TODO(step5): free any arrays that are allocated using malloc!! Free the string returned from extract_root_directory()!! It is allocated using malloc in extract_root_directory()
         free(root_directory);
-
     }else{
         //TODO(final submission): write the string to pipe
         //write to pipe
-        write(pipe_write_end, str_pipe, strlen(str_pipe));
+        write(pipe_write_end, str_pipe, 4096);
         close(pipe_write_end); //close pipe
-        
     }
-    exit(0);
 }
