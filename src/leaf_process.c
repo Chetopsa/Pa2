@@ -8,7 +8,6 @@
 char *output_file_folder = "output/inter_submission/";
 
 int main(int argc, char* argv[]) {
-    printf("LEAF PROCESS WOOOOO\n");
     if (argc != 3) {
         printf("Usage: Inter Submission --> ./leaf_process <file_path> 0\n");
         printf("Usage: Final Submission --> ./leaf_process <file_path> <pipe_write_end>\n");
@@ -48,7 +47,7 @@ int main(int argc, char* argv[]) {
     }else{
         //TODO(final submission): write the string to pipe
         //write to pipe
-        write(pipe_write_end, str_pipe, 4096);
+        write(pipe_write_end, str_pipe, 8192);
         close(pipe_write_end); //close pipe
     }
 }

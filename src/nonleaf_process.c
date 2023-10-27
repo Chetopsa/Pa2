@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-int BUFSIZE = 256;
+int BUFSIZE = 4096;
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("Usage: ./nonleaf_process <directory_path> <pipe_write_end> \n");
@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
     
     //TODO(step2): malloc buffer for gathering all data transferred from child process as in root_process.c
     char* buffer = (char*)malloc(BUFSIZE);
+    memset(buffer, 0, BUFSIZE);
     //TODO(step3): open directory
     DIR *dir = opendir(dir_path);
     struct dirent *entry;
@@ -78,16 +79,16 @@ int main(int argc, char* argv[]) {
     //TODO(step5): read from pipe constructed for child process and write to pipe constructed for parent process
     
     ssize_t bytes;
-    char all_data[4096];
+    char pipe_data[1024];
     int total_bytes = 0;
     for(int i = 0; i < pipe_idx; i ++){
-        memset(buffer, 0, BUFSIZE);
-        bytes = read(read_pipes[i], buffer, BUFSIZE);
-        strcat(all_data, buffer);
+        bytes = read(read_pipes[i], pipe_data, 1024);
+        strcat(buffer, pipe_data);
         close(read_pipes[i]);
         total_bytes += bytes;
     }
-    write(pipe_write_end, all_data, total_bytes);
+    printf("totalbytes: %d\n", total_bytes);
+    write(pipe_write_end, buffer, total_bytes);
     close(pipe_write_end);
     
    
