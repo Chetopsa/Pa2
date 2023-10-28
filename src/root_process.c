@@ -35,7 +35,7 @@ void redirection(char **dup_list, int size, char* root_dir){
     //TODO(step3): read the content each symbolic link in dup_list, write the path as well as the content of symbolic link to output file(as shown in expected)
     for(int i = 0; i < size; i++){
         char hard_path[PATH_MAX]; 
-        readlink(dup_list[i], hard_path, sizeof(hard_path) - 1);
+        readlink(dup_list[i], hard_path, sizeof(hard_path)-1);
         printf("[<path of symbolic link> --> <path of retained file>] : ");
         printf("[%s --> %s]\n", dup_list[i],  hard_path);
     }
