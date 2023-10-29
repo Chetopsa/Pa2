@@ -17,10 +17,10 @@ int main(int argc, char* argv[]) {
     char* file_path = argv[1];
     int pipe_write_end = atoi(argv[2]);
     //TODO(): create the hash of given file
-    char file_hash[8192];
+    char file_hash[4096];
     hash_data_block(file_hash, file_path);
     //TODO(): construct string write to pipe. The format is "<file_path>|<hash_value>"
-    char str_pipe[8192 + PATH_MAX];
+    char str_pipe[4096 + PATH_MAX];
    
     sprintf(str_pipe,"%s|%s|" , file_path, file_hash);
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     }else{
         //TODO(final submission): write the string to pipe
         //write to pipe
-        write(pipe_write_end, str_pipe, 8192);
+        write(pipe_write_end, str_pipe, 4096);
         close(pipe_write_end); //close pipe
     }
 }

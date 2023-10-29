@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
                 execl("./leaf_process", "Pa2/leaf_process", full_path, pipe_write, NULL);
             }
         }
+       
     }
 
     wait(NULL);
@@ -87,12 +88,10 @@ int main(int argc, char* argv[]) {
         close(read_pipes[i]);
         total_bytes += bytes;
     }
-    printf("totalbytes: %d\n", total_bytes);
     write(pipe_write_end, buffer, total_bytes);
     close(pipe_write_end);
     
    
-
     //free any heap allocated variables
     free(buffer);
 }
