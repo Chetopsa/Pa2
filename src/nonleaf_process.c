@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-int BUFSIZE = 4096;
+int BUFSIZE = 4098;
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("Usage: ./nonleaf_process <directory_path> <pipe_write_end> \n");
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
             exit(-1);
         }
         //store read end in array
-        read_pipes[pipe_idx++] = fd[0];
+        
         //get full path-name
         char full_path[PATH_MAX];
         sprintf(full_path, "%s/%s", dir_path, entry->d_name);
@@ -64,34 +64,44 @@ int main(int argc, char* argv[]) {
         //fork process
         pid = fork();
         if(pid == 0){
+            close(fd[0]);
             if (S_ISDIR(stratbuf->st_mode)){
                 free(stratbuf);
-                execl("./nonleaf_process", "Pa2/nonleaf_process", full_path, pipe_write, NULL);
+                execl("./nonleaf_process", "./nonleaf_process", full_path, pipe_write, NULL);
             }else {
                 free(stratbuf);
-                execl("./leaf_process", "Pa2/leaf_process", full_path, pipe_write, NULL);
+                execl("./leaf_process", "./leaf_process", full_path, pipe_write, NULL);
             }
+        }else{
+            wait(NULL);
+            close(fd[1]);
+            read_pipes[pipe_idx++] = fd[0];
         }
        
     }
-
-    wait(NULL);
-    close(fd[1]);
+    closedir(dir);
+    
     //TODO(step5): read from pipe constructed for child process and write to pipe constructed for parent process
     
     ssize_t bytes;
-    char pipe_data[1024];
-    int total_bytes = 0;
+    
     for(int i = 0; i < pipe_idx; i ++){
-        bytes = read(read_pipes[i], pipe_data, 1024);
-        strcat(buffer, pipe_data);
+        char pipe_data[4096];
+        memset(pipe_data, 0, sizeof(pipe_data));
+        //read from pipe
+        bytes = read(read_pipes[i], &pipe_data, sizeof(pipe_data));
+        //concatenate
+        strncat(buffer, pipe_data, bytes);
         close(read_pipes[i]);
-        total_bytes += bytes;
     }
-    write(pipe_write_end, buffer, total_bytes);
+    write(pipe_write_end, buffer, strlen(buffer));
+    printf("Cummulative data length: %ld\n", strlen(buffer));
     close(pipe_write_end);
     
    
     //free any heap allocated variables
     free(buffer);
+    free(read_pipes);
+
+    printf("non_leaf success!\n ");
 }

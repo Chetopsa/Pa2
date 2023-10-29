@@ -31,9 +31,9 @@ void redirection(char **dup_list, int size, char* root_dir){
         perror("failed to open file\n");
         exit(-1);
     }
-    if (dup2(fd, 1) == -1){
-                    perror("Failed to redirect output\n");
-                    exit(-1);
+    if (dup2(fd, STDOUT_FILENO) == -1){
+        perror("Failed to redirect output\n");
+        exit(-1);
     }
 
     //TODO(step3): read the content each symbolic link in dup_list, write the path as well as the content of symbolic link to output file(as shown in expected)
@@ -43,7 +43,6 @@ void redirection(char **dup_list, int size, char* root_dir){
         
         readlink(dup_list[i], hard_path, sizeof(hard_path)-1);
         printf("[<path of symbolic link> --> <path of retained file>] : [%s --> %s]\n", dup_list[i],  hard_path);
-        
     }
     //resotore
     fflush(stdout);
@@ -56,7 +55,10 @@ void create_symlinks(char **dup_list, char **retain_list, int size) {
     //TODO(): create symbolic link at the location of deleted duplicate file
     //TODO(): dup_list[i] will be the symbolic link for retain_list[i]
     for(int i = 0; i < size; i++){
-        symlink(retain_list[i], dup_list[i]);
+        if(symlink(retain_list[i], dup_list[i]) != 0){
+            perror("FAILURE: symlink");
+            exit(1);
+        }
     }
    
 }
@@ -64,7 +66,10 @@ void create_symlinks(char **dup_list, char **retain_list, int size) {
 void delete_duplicate_files(char **dup_list, int size) {
     //TODO(): delete duplicate files, each element in dup_list is the path of the duplicate file
     for(int i = 0; i < size; i++){
-        remove(dup_list[i]);
+        if(remove(dup_list[i]) != 0){
+            printf("FAILURE: could not remove file\n");
+            exit(1);
+        }
     }
 
 }
@@ -92,34 +97,42 @@ int main(int argc, char* argv[]) {
     }
 
     //TODO(step2): fork() child process & read data from pipe to all_filepath_hashvalue
-    char pipe_write[8];
-    sprintf(pipe_write, "%d", fd[1]);
+    
     pid_t pid = fork();
     
     if(pid == 0){
+        char pipe_write[10];
+        sprintf(pipe_write, "%d", fd[1]);
         execl("./nonleaf_process", "PA2/nonleaf_process", root_directory, pipe_write, NULL);
     }
 
-    else{
-        wait(NULL);
-        //TODO(step3): malloc dup_list and retain list & use parse_hash() in utils.c to parse all_filepath_hashvalue
-        // dup_list: list of paths of duplicate files. We need to delete the files and create symbolic links at the location
-        // retain_list: list of paths of unique files. We will create symbolic links for those files
-        
-        read(fd[0], all_filepath_hashvalue, 4098);
-        char** dup_list = (char**)malloc(4098*60);
-        char** retain_list = (char**)malloc(4098*60);
-
-        int size = parse_hash(all_filepath_hashvalue, dup_list, retain_list);
-        //TODO(step4): implement the functions
-       
-        delete_duplicate_files(dup_list,size);
-        create_symlinks(dup_list, retain_list, size);
-        redirection(dup_list, size, argv[1]);
-        
-
-        //TODO(step5): free any arrays that are allocated using malloc!!
-        free(dup_list);
-        free(retain_list);
+    
+    waitpid(pid, NULL, 0);
+    //TODO(step3): malloc dup_list and retain list & use parse_hash() in utils.c to parse all_filepath_hashvalue
+    // dup_list: list of paths of duplicate files. We need to delete the files and create symbolic links at the location
+    // retain_list: list of paths of unique files. We will create symbolic links for those files
+    
+    read(fd[0], &all_filepath_hashvalue, sizeof(all_filepath_hashvalue));
+    char** dup_list = (char**)malloc(sizeof(char*)*100);
+    char** retain_list = (char**)malloc(sizeof(char*)*100);
+    //initialzie to NULL
+    for (int i=0; i < 100; i++){
+        dup_list[i] = NULL;
+        retain_list[i] = NULL;
         }
+
+    int size = parse_hash(all_filepath_hashvalue, dup_list, retain_list);
+    //TODO(step4): implement the functions
+    
+    delete_duplicate_files(dup_list,size);
+    create_symlinks(dup_list, retain_list, size);
+    redirection(dup_list, size, argv[1]);
+    
+
+    //TODO(step5): free any arrays that are allocated using malloc!!
+    
+    free(dup_list);
+    free(retain_list);
+
+    printf("Root success!\n ");
 }

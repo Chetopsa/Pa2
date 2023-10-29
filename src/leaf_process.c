@@ -17,10 +17,11 @@ int main(int argc, char* argv[]) {
     char* file_path = argv[1];
     int pipe_write_end = atoi(argv[2]);
     //TODO(): create the hash of given file
-    char file_hash[4096];
+    char file_hash[SHA256_BLOCK_SIZE * 2 + 1];
+    memset(file_hash, 0, sizeof(file_hash));
     hash_data_block(file_hash, file_path);
     //TODO(): construct string write to pipe. The format is "<file_path>|<hash_value>"
-    char str_pipe[4096 + PATH_MAX];
+    char* str_pipe = malloc(strlen(file_path) + strlen(file_hash) + 3);
    
     sprintf(str_pipe,"%s|%s|" , file_path, file_hash);
 
@@ -47,7 +48,10 @@ int main(int argc, char* argv[]) {
     }else{
         //TODO(final submission): write the string to pipe
         //write to pipe
-        write(pipe_write_end, str_pipe, 4096);
+        write(pipe_write_end, str_pipe, strlen(str_pipe));
         close(pipe_write_end); //close pipe
     }
+    free(str_pipe);
+    printf("leaf success!\n ");
+    return 0;
 }
