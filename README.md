@@ -8,24 +8,24 @@
 - Ahmed Kadar (kadar008)
 
 ## 2. Tested On
-- **CSELabs Machine**: csel-kh1250-01.cselabs.umn.edu
+- **CSELabs Machine**: csel-cuda-01.cselabs.umn.edu
 
 ## 3. Changes Made
-- Implemented the `leaf_process.c` functionality as per the project requirements. This involves:
-  - Extracting file paths and pipe write ends from command-line arguments.
-  - Computing hash values of the file's content.
-  - Constructing and writing strings to pipes or output files.
-  - Extracting filenames, determining output file locations, and freeing allocated memory.
-  - Made changes to MakeFile for it to work on intermediate submission.
+- added a make zip to the MakeFile
 
 ## 4. Individual Contributions
-- **[Cheston]**: Worked on leaf_process.c program
-- **[Ahmed Dayib]**:Worked on Readme and helped with leaf_process program
-- **[Ahmed Kadar]**: Worked out plan and debug program.
+- **[Cheston]**: Worked on Readme, leaf_process.c and root_processc
+- **[Ahmed Dayib]** : Worked on Readme and root_process and helped with leaf_process program
+- **[Ahmed Kadar]**: Worked out plan and helped with root process and debugging
 
 ## 5. Plan for Inter-process Communication
-- The parent processes will aggregate information received from the child processes through the read end of the pipes.
-- Non-leaf processes will be responsible for spawning the appropriate child processes based on the directory structure, passing necessary arguments, and aggregating data from their children.
-- Our goal is to ensure smooth data transfer between processes and handle potential errors efficiently.
+- Root process: creates a pipe and spawns first non_leaf process then collects the agregate data from a pipe.
+creates the symlinks, handles delteing the files and displaying results to the output file.
+- Non-leaf: processes will be responsible for spawning the appropriate child processes based on the directory structure, passing necessary arguments, and aggregating data from their children.
+- Child-process: hashes the data and writes it to the pipe
+- Changes from inter: added more detail for what the root process handles
+
+## Gradescope note:
+- On gradescope it says it is not able to find our output files. Despite when tested locally it works for the   first three test cases. We tried several different changes to try to fix it to no avail.
 
 
